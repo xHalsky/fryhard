@@ -33,19 +33,32 @@ const FRY_TYPES = {
 };
 
 
-// Assets
+// Assets & Audio Pooling
+const CRUNCH_POOL_SIZE = 8;
+const crunchPool = [];
+
 const assets = {
     player: {
         neutral: new Image(),
         happy: new Image(),
         sad: new Image()
     },
-    crunch: [
-        new Audio('assets/crunch1.WAV'),
-        new Audio('assets/crunch2.WAV'),
-        new Audio('assets/crunch3.WAV')
+    crunchSamples: [
+        'assets/crunch1.WAV',
+        'assets/crunch2.WAV',
+        'assets/crunch3.WAV'
     ]
 };
+
+function initAudioPool() {
+    for (let i = 0; i < CRUNCH_POOL_SIZE; i++) {
+        const audio = new Audio();
+        audio.src = assets.crunchSamples[i % assets.crunchSamples.length];
+        audio.preload = 'auto';
+        crunchPool.push(audio);
+    }
+}
+
 assets.player.neutral.src = 'assets/neutral.png';
 assets.player.happy.src = 'assets/happy.png';
 assets.player.sad.src = 'assets/sad.png';
@@ -82,6 +95,7 @@ const player = {
 // --- Initialization ---
 
 function init() {
+    initAudioPool();
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     
@@ -165,9 +179,6 @@ class Fry {
         } else {
             // Draw stylized Fry
             ctx.fillStyle = this.type.color;
-            // Shadow for depth
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
             ctx.roundRect(-this.width / 2, -this.height / 2, this.width, this.height, 3);
             ctx.fill();
@@ -236,8 +247,6 @@ class FloatingText {
         ctx.fillStyle = this.color;
         ctx.font = 'bold 24px Outfit';
         ctx.textAlign = 'center';
-        ctx.shadowBlur = 5;
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.fillText(this.text, this.x, this.y);
         ctx.restore();
     }
@@ -263,9 +272,12 @@ function startGame() {
     timerVal.textContent = timeLeft;
     updateProgressUI();
     
+    // iOS Audio Unlock Logic
+    unlockAudio();
+
     // Start Soundtrack
     bgm.currentTime = 0;
-    bgm.play().catch(() => {}); // Autoplay protection
+    bgm.play().catch((e) => console.log("BGM play error:", e)); 
 
     startOverlay.classList.remove('active');
     gameOverOverlay.classList.remove('active');
@@ -279,7 +291,22 @@ function updateTimer() {
     if (gameState !== 'PLAYING') return;
     timeLeft--;
     timerVal.textContent = timeLeft;
+
+    // Pulse BGM volume slightly or check playback
+    if (bgm.paused && timeLeft > 0) bgm.play().catch(() => {});
+
     if (timeLeft <= 0) endGame();
+}
+
+function unlockAudio() {
+    const allAudio = [bgm, partyBgm, ...crunchPool];
+    allAudio.forEach(a => {
+        a.muted = true;
+        a.play().then(() => {
+            a.pause();
+            a.muted = false;
+        }).catch(e => console.log("Unlock failed for one element", e));
+    });
 }
 
 function endGame() {
@@ -305,12 +332,14 @@ function endGame() {
     gameOverOverlay.classList.add('active');
 }
 
+let crunchIndex = 0;
 function playCrunch() {
-    const sound = assets.crunch[Math.floor(Math.random() * assets.crunch.length)];
-    // Clone node to allow overlapping sounds for fast catches
-    const soundClone = sound.cloneNode();
-    soundClone.volume = 0.7; // 30% lower volume
-    soundClone.play().catch(() => {}); // Catch-block to prevent errors if browser blocks autoplay
+    const sound = crunchPool[crunchIndex];
+    sound.currentTime = 0;
+    sound.volume = 0.5; // Lowered further for iOS overlap comfort
+    sound.play().catch(() => {});
+    
+    crunchIndex = (crunchIndex + 1) % CRUNCH_POOL_SIZE;
 }
 
 function handleKeyDown(e) {
@@ -366,10 +395,15 @@ function drawPlayer() {
     if (player.expression === 'happy') img = assets.player.happy;
     if (player.expression === 'sad') img = assets.player.sad;
 
-    // If invincible, add a silhouette-hugging halo
+    // If invincible, add a neon pulsing border
     if (isInvincible) {
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = `hsl(${Date.now() % 360}, 100%, 50%)`;
+        ctx.strokeStyle = `hsl(${Date.now() % 360}, 100%, 50%)`;
+        ctx.lineWidth = 5;
+        ctx.strokeRect(x - 5, y - 5, w + 10, h + 10);
+        
+        // Add a pulsing inner glow manually (fast)
+        ctx.fillStyle = `hsla(${Date.now() % 360}, 100%, 50%, 0.2)`;
+        ctx.fillRect(x, y, w, h);
     }
 
     // Draw Avatar Image
