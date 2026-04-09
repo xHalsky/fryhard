@@ -27,7 +27,9 @@ body {
     position: relative;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
@@ -309,36 +311,36 @@ button:active {
 /* Invincibility UI */
 #invincibility-ui {
     position: absolute;
-    bottom: 100px;
+    top: 135px; /* Below progress bar */
     left: 50%;
     transform: translateX(-50%);
     background: linear-gradient(90deg, #ff00ff, #00ffff);
-    padding: 10px 30px;
-    border-radius: 50px;
+    padding: 6px 20px;
+    border-radius: 30px;
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     display: none;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
     animation: flash 1s infinite;
     z-index: 50;
     color: white;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    border: 2px solid white;
+    border: 1px solid white;
 }
 
 #party-timer {
     font-family: 'Fredoka', cursive;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     color: #ffcc33;
 }
 
 
 #invincibility-ui.active {
-    display: block;
+    display: flex; /* Changed from block to flex to support the column gap */
 }
 
 @keyframes fadeIn {
@@ -356,8 +358,39 @@ button:active {
     50% { transform: translateY(-15px); }
 }
 
+/* Mobile Control Bar */
+#control-bar {
+    position: relative;
+    width: 100%;
+    height: 30px; /* Slightly taller for better touch target */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: none; /* Only show on small screens */
+    justify-content: center;
+    align-items: center;
+    z-index: 60;
+    touch-action: none; /* Prevent scrolling while playing */
+}
+
+.control-handle {
+    width: 60px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
 /* Mobile Optimizations */
 @media (max-width: 600px) {
+    #control-bar {
+        display: flex;
+    }
+    
+    #gameCanvas {
+        height: calc(100% - 30px);
+    }
+
     h1 {
         font-size: 2.2rem;
     }

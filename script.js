@@ -20,8 +20,9 @@ const partyBgm = document.getElementById('party-bgm');
 // Game Constants (Dynamic)
 let GAME_WIDTH = window.innerWidth;
 let GAME_HEIGHT = window.innerHeight;
-const PLAYER_WIDTH = 150;
-const PLAYER_HEIGHT = 150;
+let PLAYER_WIDTH = 150;
+let PLAYER_HEIGHT = 150;
+const BASE_PLAYER_SIZE = 150;
 const MAX_FRIES_FOR_FULL = 50; 
 const FRY_TYPES = {
     GOLDEN: { color: '#ffcc33', points: 10, speed: 3, label: 'Perfectly Golden' },
@@ -93,19 +94,37 @@ function init() {
     startBtn.addEventListener('click', startGame);
     restartBtn.addEventListener('click', startGame);
 
+    // Control bar touch handling
+    const controlBar = document.getElementById('control-bar');
+    if (controlBar) {
+        controlBar.addEventListener('touchstart', handleTouchMove, { passive: false });
+        controlBar.addEventListener('touchmove', handleTouchMove, { passive: false });
+    }
+
     requestAnimationFrame(gameLoop);
 }
 
 function resizeCanvas() {
-    GAME_WIDTH = window.innerWidth;
-    GAME_HEIGHT = window.innerHeight;
+    // Get actual dimensions from the container (account for flex layout and control bar)
+    const container = canvas.parentElement;
+    GAME_WIDTH = container.clientWidth;
+    GAME_HEIGHT = canvas.clientHeight; // Use canvas client height directly
     
     canvas.width = GAME_WIDTH;
     canvas.height = GAME_HEIGHT;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+
+    // Scale player for mobile if screen is small
+    if (GAME_WIDTH < 600) {
+        PLAYER_WIDTH = Math.min(BASE_PLAYER_SIZE, GAME_WIDTH * 0.35);
+        PLAYER_HEIGHT = PLAYER_WIDTH; // Keep square
+    } else {
+        PLAYER_WIDTH = BASE_PLAYER_SIZE;
+        PLAYER_HEIGHT = BASE_PLAYER_SIZE;
+    }
 
     // Update player Y to stick to bottom
+    player.width = PLAYER_WIDTH;
+    player.height = PLAYER_HEIGHT;
     player.y = GAME_HEIGHT - PLAYER_HEIGHT;
 
     // Enable Nearest Neighbor Scaling for crisp pixels
@@ -290,6 +309,7 @@ function playCrunch() {
     const sound = assets.crunch[Math.floor(Math.random() * assets.crunch.length)];
     // Clone node to allow overlapping sounds for fast catches
     const soundClone = sound.cloneNode();
+    soundClone.volume = 0.7; // 30% lower volume
     soundClone.play().catch(() => {}); // Catch-block to prevent errors if browser blocks autoplay
 }
 
