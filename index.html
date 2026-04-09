@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fry Hard | The Last Fry</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Outfit:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-item" id="score-container">
+                <span class="label">SCORE</span>
+                <span id="score-val">0</span>
+            </div>
+            <div id="timer-container" class="hud-item">
+                <span class="label">TIME</span>
+                <span id="timer-val">60</span>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Overlay: Start Screen -->
+        <div id="start-overlay" class="overlay active">
+            <div class="overlay-content">
+                <img src="assets/Fries Game Logo.png" id="game-logo" alt="The Fry Catcher Logo">
+                <h1>Fry Hard: The Last Fry</h1>
+                <p>З днем народження, Катю!</p>
+                <div class="instruction-box">
+                    <p>Catch the good fries, avoid the bad ones!</p>
+                    <div class="fry-legend">
+                        <div class="legend-item"><span class="fry-icon gold"></span> Golden (+10)</div>
+                        <div class="legend-item"><span class="fry-icon baked"></span> Baked (+15)</div>
+                        <div class="legend-item"><span class="fry-icon soggy"></span> Soggy (-5)</div>
+                        <div class="legend-item"><span class="fry-icon burnt"></span> Burnt (-10)</div>
+                        <div class="legend-item"><span class="fry-icon birthday"></span> Cake (INVINCIBLE!)</div>
+                    </div>
+                </div>
+                <button id="start-btn">START GAME</button>
+                <p class="controls-hint">Use <b>Mouse</b> or <b>Arrow Keys</b> to move</p>
+            </div>
+        </div>
+
+        <!-- Overlay: Game Over -->
+        <div id="game-over-overlay" class="overlay">
+            <div class="overlay-content">
+                <h1 id="game-over-title">Time's Up!</h1>
+                <p>Молодець, що зловила ту картоплю!</p>
+                <div class="final-stats">
+                    <div class="final-score">
+                        <span>SCORE</span>
+                        <span id="final-score-val">0</span>
+                    </div>
+                    <div id="grade-container">
+                        <span>YOUR GRADE</span>
+                        <span id="final-grade-val">F</span>
+                    </div>
+                </div>
+                <button id="restart-btn">PLAY AGAIN</button>
+            </div>
+        </div>
+
+        <!-- Progress Bar (Top) -->
+        <div id="progress-container">
+            <div class="progress-label">BATCH PROGRESS</div>
+            <div id="progress-bar-wrapper">
+                <div id="progress-fill"></div>
+                <div id="progress-percent">0%</div>
+            </div>
+        </div>
+
+
+        <!-- Invincibility Notification -->
+        <div id="invincibility-ui" class="">
+            <div class="party-title">🍟 !!!PARTY TIME!!! 🍟</div>
+            <div id="party-timer">12.0s</div>
+        </div>
+
+    </div>
+
+    <!-- Background Music (Optional, but ready) -->
+    <audio id="bgm" loop src="assets/soundtrack.mp3"></audio>
+    <audio id="party-bgm" src="assets/party_time.MP3"></audio>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>
